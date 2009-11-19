@@ -1,5 +1,9 @@
 FACEBOOK PROJECT
 
-il progetto è sviluppato con eclipse, per ora sto sviluppando l'implementazione
+Il progetto è sviluppato con eclipse, per ora sto sviluppando l'implementazione
 della chat, ma non ancora è possibile fare il login a causa di problemi con i
-cookies
+cookies.
+
+Nella cartella *python* è presente l'implementazione in python della chat
+funzionante, può essere usata per studiare il protocollo di facebook e per fare
+dei test.

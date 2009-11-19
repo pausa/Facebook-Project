@@ -1,0 +1,79 @@
+GET: (GET)
+http://[1].channel[2].facebook.com/x/[3]/false/p_[4]=[5]
+
+- [1] = numero che sembra casuale;
+- [2] = canale su cui è instaurata la conversazione;
+- [3] = numero che sembra casuale;
+- [4] = id;
+- [5] = numero di sequenza del messaggio (per trovarlo inviare una richiesta con -1).
+
+SEND MSG: (POST)
+http://www.facebook.com/ajax/chat/send.php?client_time=[1]&msg_id=[2]&msg_text=[3]&popped_out=true&post_form_id=[4]&to=[5]
+
+- [1] = indica il tempo corrente, in microsecondi (restituisce il valore della funzione time.time() di python);
+- [2] = id del messaggio, numero casuale molto grande;
+- [3] = testo del messaggio in chiaro;
+- [4] = ottenuto dalla home page;
+- [5] = id del destinatario.
+
+
+--------------JSON------------------
+
+per il conversione da json è necessario partire dal carattere 9.
+
+BUDDYLIST:
+
+           |-----> errorSummary                    |------> forcedRender
+           |                                       |                                 |------> enableVC
+           |-----> errorIsWarning                  |------> flData                   |
+           |                                       |                                 |------> thumbSrc
+           |                                       |------> userInfos----------> IDs-|
+           |                                       |                                 |------> name
+           |                                       |------> listChanged              |
+buddy-tree-|               |----------> buddy_list-|                                 |------> firstName
+           |               |                       |------> availableCount
+           |               |                       |       
+           |-----> payload-|                       |------> wasAvailableIDs
+           |               |                       |               
+           |               |----------> time       |------> flMode
+           |                                       |
+           |-----> error                           |------> nowAvailableList---> IDs--------> i
+
+
+RECEIVE MESSAGE: (t = msg)
+
+                        |---> from_name
+                        |
+                        |---> from
+                        |
+         |--> c         |---> from_first_name
+         |              |   
+         |--> t         |---> to
+         |       |--> 0-|                      |----> clientTime
+         |       |      |---> to_name          |
+         |       |      |                      |----> text
+msg-tree-|       |      |---> msg--------------|
+         |       |      |                      |----> msgID
+         |       |      |---> type             |
+         |       |      |                      |----> time
+         |       |      |---> to_first_name
+         |--> ms-|
+                 |      |---> type
+                 |      |
+                 |--> 1-|---> id
+                        |
+                        |---> window_id
+
+SEND MESSAGE:
+
+          |-----> errorDescription
+          |     
+          |-----> errorSummary
+          |     
+          |-----> errorIsWarning
+err-tree--|     
+          |-----> invalidate_cache
+          |     
+          |-----> error
+          |     
+          |-----> payload

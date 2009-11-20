@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import javax.net.ssl.HttpsURLConnection;
+
 /**
  * api a basso livello, si occupa di comunicare direttamente con facebook
  * @author pausa
@@ -17,7 +19,7 @@ public class BasicApi implements Api
 	private String channel = null;			//canale assegnato all'utente
 	private int seq = -1;					//# di sequenza del messaggio
 	private URL basePage = null;			//url della pagina base
-	private CookieManager cm = null;
+	private CookieHandler cm = null;
 	private String cookie = null;
 	
 	/**
@@ -31,12 +33,8 @@ public class BasicApi implements Api
 		user = new String ("");
 		post_form_id = new String ("");
 		channel = new String ("");
-		basePage = new URL (Urls.FB_BASE); 
-		cm = new CookieManager();
+		basePage = new URL (Urls.FB_BASE);
 		
-		cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-		
-		java.net.CookieHandler.setDefault(cm);
 	}
 	
 	/**
@@ -60,71 +58,67 @@ public class BasicApi implements Api
 	{
 		try
 		{
+			
+			HttpURLConnection.setFollowRedirects(false);
+			
 			BufferedReader in = null;
 			OutputStreamWriter out = null;
 			URL login = null, home = null;
-			URLConnection loginConn = null, homeConn = null;
+			HttpURLConnection loginConn = null, homeConn = null;
 			String testline = null;
+			
 			
 			//costruisco l'URL per il login
 			login = new URL (basePage, Urls.FB_LOGIN_PAGE);
 			home = new URL (basePage, Urls.FB_HOME_PAGE);
-//			
-//			//creo una connessione per ricevere i cookies
-//			homeConn = home.openConnection();
-//			
-//			setUserAgent (homeConn);
-//			
-//			
-//			while ((testline = in.readLine()) != null);
-//			
-//			in.close();
-//			
-//			printCookies();
 			
-			//creo una connessione per inviare i dati
-			loginConn = login.openConnection();
-			
+			loginConn = (HttpURLConnection)login.openConnection();
+			initCookieManager();		
 			setUserAgent(loginConn);
 			
+
+			System.out.println (loginConn.getResponseCode());
+			loginConn.getContent();
+			loginConn.disconnect();
+			printCookies(loginConn);
+
+			loginConn = (HttpURLConnection)login.openConnection();
+			setUserAgent(loginConn);
+			loginConn.setUseCaches(false);
+			loginConn.setRequestMethod("POST");
+
 			loginConn.setDoOutput(true);
 			
-			//ottengo lo stream per mandare i dati
-			out = new OutputStreamWriter (loginConn.getOutputStream());
+			out = new OutputStreamWriter(loginConn.getOutputStream());
 			
-			//scrivo i dati nello stream
 			out.write("email=" + uname + "&pass=" + password);
-			
 			out.flush();
+			out.close();
+			loginConn.disconnect();
+						
+			System.out.println (loginConn.getResponseCode());
+			System.out.println (loginConn.getRequestMethod());
 			
 			loginConn.getContent();
 			
-			printCookies();
+//			in = new BufferedReader(new InputStreamReader(loginConn.getInputStream()));
+//			
+//			while ((testline = in.readLine()) != null)
+//				System.out.println (">>" + testline);
+//			
+//			System.out.println (loginConn.getResponseCode());	
 			
-			//creo uno stream per la risposta
-			in = new BufferedReader( new InputStreamReader(
-											loginConn.getInputStream()));
 			
-			//recupero la risposta di facebook
-			while ((testline = in.readLine()) != null)
-				System.out.println (testline);
+			printCookies(loginConn);
 			
-			in.close();
 			
-			loginConn = home.openConnection();
-			
-			loginConn.getContent();
-			
-			in = new BufferedReader( new InputStreamReader(
-											loginConn.getInputStream()));
-
-			//recupero la risposta di facebook
-			while ((testline = in.readLine()) != null)
-				System.out.println (testline);
-			
-			printCookies();
 						
 		}
+//		catch (URISyntaxException e)
+//		{
+//			System.out.println ("error: " + e.getCause());
+//			
+//		}
 		catch (MalformedURLException e)
 		{
 			System.out.println ("error: " + e.getCause());
@@ -168,6 +162,12 @@ public class BasicApi implements Api
 		
 	}
 	
+	private void initCookieManager ()
+	{
+		cm = new CookieManager();
+		((CookieManager)cm).setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+		java.net.CookieHandler.setDefault(cm);		
+	}
 	/**
 	 * imposta l'user agent per la connessione
 	 * @param u
@@ -177,14 +177,29 @@ public class BasicApi implements Api
 		u.setRequestProperty("User-Agent", Urls.USER_AGENT);	
 	}
 	
-	private void printCookies ()
+	private void printCookies (HttpURLConnection conn)
 	{
-		CookieStore cs = cm.getCookieStore();
+		CookieStore cs = ((CookieManager)java.net.CookieManager
+										.getDefault()).getCookieStore();
+		
+		int i = 0;
+		System.out.println ("----------Cookies--------------");
+		for (i = 0; i < 99; i++)
+		{
+			String s = conn.getHeaderFieldKey(i);
+			
+			if (s != null && s.equals("Set-Cookie"))
+				System.out.println ("Set-Cookie: " + conn.getHeaderField(i));
+				
+			
+		}
+		
+		System.out.println("-------------------------------");
 		
 		for (HttpCookie c : cs.getCookies())
 			System.out.println (c.toString());
 		
 		System.out.println("-------------------------------------------");
 	}
-
+	
 }

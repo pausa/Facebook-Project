@@ -61,9 +61,12 @@ public class BasicApi implements Api
 			URL login = null;
 			HttpURLConnection loginConn = null;
 			
+			System.out.println("--------------LOGIN:----------------");
 			
 			//costruisco l'URL per il login
 			login = new URL (basePage, Urls.FB_LOGIN_PAGE);
+			
+			HttpURLConnection.setFollowRedirects(false);
 			
 			//apro una connessione verso la pagina
 			loginConn = openConnection(login);
@@ -101,7 +104,8 @@ public class BasicApi implements Api
 			
 			printCookies(loginConn);
 			
-			
+			System.out.println("-------------------END LOGIN---------" +
+														  "-------------");
 						
 		}
 		catch (MalformedURLException e)
@@ -122,8 +126,92 @@ public class BasicApi implements Api
 	@Override
 	public void getInfos ()
 	{
-		// TODO Auto-generated method stub
-		
+		try
+		{
+			System.out.println ("------------------------GET INFOS----------" +
+																  "---------");
+			//inizializzazione delle variabili
+			URL infopage = null;
+			HttpURLConnection infoConn = null;
+			BufferedReader read = null;
+			String line = null;
+			
+			int pfStart = -1, pfEnd = -1;
+			CookieStore cs = ((CookieManager)cm).getCookieStore();
+			
+			//cerco l'user id all'interno dei cookies
+			for (HttpCookie c : cs.getCookies())
+			{
+				if (c.getName().equals("c_user"))
+				{
+					user += c.getValue();
+					break;
+				}	
+			}
+			
+			//stampo l'user id
+			if (this.user.equals(""))
+				System.out.println("Login errato");
+			
+			else 
+				System.out.println("user id: " + user);
+			
+			//cerco il post form id all'interno della finestra di chat
+			infopage = new URL(basePage, Urls.FB_CHAT_WIN);
+			
+			infoConn = openConnection(infopage);
+			
+			read = new BufferedReader(new InputStreamReader
+											  (infoConn.getInputStream()));
+			
+			//cerco la linea corretta nel codice
+			while ((line = read.readLine()) != null)
+			{
+				if (line.startsWith(Urls.FB_POST_FORM))
+				{
+					//estraggo la stringa
+					pfStart = line.indexOf("value=");
+					pfStart = line.indexOf("\"", pfStart);
+					pfStart ++;
+					
+					pfEnd = line.indexOf("\"", pfStart);
+					
+					post_form_id = line.substring(pfStart, pfEnd);
+					
+				}
+				else if (line.startsWith(Urls.FB_CHANNEL))
+				{
+					pfStart = line.lastIndexOf("channel");
+					pfStart += 7;
+					pfEnd = pfStart + 2;
+					channel = line.substring(pfStart, pfEnd);	
+				}
+				
+			}
+			
+			//stampo
+			if (post_form_id == null)
+				System.out.println("impossibile recuperare post_form_id");
+			else
+				System.out.println("post form: " + post_form_id);
+			
+			if (channel == null)
+				System.out.println("impossibile recuperare channel");
+			else
+				System.out.println ("channel: " + channel);
+			
+			System.out.println ("----------------END GET INFOS--------------");
+			
+		}
+		catch (MalformedURLException e)
+		{
+			System.out.println ("error: " + e.getCause());
+		}
+		catch (IOException e)
+		{
+			System.out.println ("errore imprevisto");
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -185,8 +273,7 @@ public class BasicApi implements Api
 	 */
 	private void printCookies (HttpURLConnection conn)
 	{
-		CookieStore cs = ((CookieManager)java.net.CookieManager
-										.getDefault()).getCookieStore();
+		CookieStore cs = ((CookieManager)cm).getCookieStore();
 		
 		int i = 0;
 		System.out.println ("----------Cookies--------------");

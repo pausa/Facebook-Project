@@ -16,12 +16,13 @@ public interface Api
 	void login (String uname, String password);
 	
 	/**
-	 * recupera id utente e post_form_id
+	 * recupera id utente, post_form_id e channel
 	 */
 	void getInfos ();
 	
 	/**
 	 * ottiene la buddyList
+	 * @return: da definire, appena avrò deciso l'oggetto migliore...
 	 */
 	void getBuddyList ();
 	
@@ -34,6 +35,7 @@ public interface Api
 	
 	/**
 	 * riceve un messaggio dal server
+	 * @return: da definire
 	 */
 	void receive ();
 }

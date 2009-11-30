@@ -1,0 +1,5 @@
+BasicApi:
+	- implementare getBuddyList();
+	- implementare receive();
+	- implemetare send();
+	- implementare un controllo degli errori basati su eccezioni;

@@ -1,3 +1,18 @@
+30/11/09:
+-BasicApi:
+	- implementato il recuper del channel nella getInfos();
+	- aggiunto un semplice controllo degli errori nella getInfos();
+
+-Urls:
+	- aggiunte le stringhe per la ricerca del post_form_id e del 
+	  channel;
+
+27/11/09:
+-BasicApi:
+	- implementato il recupero dell'user_id nella getInfos();
+	- implementato il recupero del post_form_id nella getInfos();
+
 21/11/09:
-- risolto il problema dei cookies, login effettuato con successo;
-- aggiunta classe "src/utils/MyCookieManager.java" per gestire i cookies;
+-BasicApi:
+	- risolto il problema dei cookies, login effettuato con successo;
+	- aggiunta classe "src/utils/MyCookieManager.java" per gestire i cookies;

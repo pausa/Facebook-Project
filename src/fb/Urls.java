@@ -30,4 +30,9 @@ public abstract class Urls
 										"rv:1.9.1.3) Gecko/20090913 " +
 										"Firefox/3.5.2");
 	
+	public final static String FB_POST_FORM = new String ("<input type=" +
+									 	"\"hidden\" id=\"post_form_id\" " +
+										   "name=\"post_form_id\" value=");
+	
+	public final static String FB_CHANNEL = new String ("channelManager.iframeLoad");
 }
